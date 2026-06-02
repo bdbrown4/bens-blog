@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bdbrown4.github.io/bens-blog/sitemap-index.xml

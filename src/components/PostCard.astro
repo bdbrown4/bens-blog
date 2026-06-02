@@ -1,0 +1,35 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import FormattedDate from './FormattedDate.astro';
+import { readingTime } from '../utils/reading-time';
+import { href } from '../utils/path';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+const { post } = Astro.props;
+const rt = readingTime(post.body ?? '');
+---
+
+<article class="post-card">
+  <h2 class="post-card-title">
+    <a href={href(`/blog/${post.id}/`)}>{post.data.title}</a>
+  </h2>
+  <p class="post-meta">
+    <FormattedDate date={post.data.pubDate} />
+    <span class="dot">·</span>
+    <span>{rt}</span>
+  </p>
+  <p class="post-card-excerpt">{post.data.description}</p>
+  {
+    post.data.tags.length > 0 && (
+      <p class="tags">
+        {post.data.tags.map((tag) => (
+          <a class="tag" href={href(`/tags/${tag}/`)}>
+            #{tag}
+          </a>
+        ))}
+      </p>
+    )
+  }
+</article>

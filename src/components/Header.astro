@@ -1,0 +1,36 @@
+---
+import { SITE_TITLE } from '../consts';
+import { href } from '../utils/path';
+import ThemeToggle from './ThemeToggle.astro';
+
+const pathname = Astro.url.pathname.replace(/\/$/, '');
+
+const links = [
+  { label: 'Home', path: '/' },
+  { label: 'Blog', path: '/blog/' },
+  { label: 'Tags', path: '/tags/' },
+  { label: 'About', path: '/about/' },
+];
+
+function isActive(path: string): boolean {
+  const target = href(path).replace(/\/$/, '');
+  if (path === '/') return pathname === target;
+  return pathname === target || pathname.startsWith(target + '/');
+}
+---
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href={href('/')}>{SITE_TITLE}</a>
+    <nav class="nav" aria-label="Primary">
+      {
+        links.map((link) => (
+          <a href={href(link.path)} class:list={['nav-link', { active: isActive(link.path) }]}>
+            {link.label}
+          </a>
+        ))
+      }
+      <ThemeToggle />
+    </nav>
+  </div>
+</header>

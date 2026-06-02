@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { href } from '../utils/path';
+---
+
+<BaseLayout title="Page not found" description="That page could not be found.">
+  <section class="hero">
+    <h1>404</h1>
+    <p class="lead">That page wandered off somewhere.</p>
+    <p><a class="button" href={href('/')}>← Back home</a></p>
+  </section>
+</BaseLayout>

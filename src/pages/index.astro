@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import { href } from '../utils/path';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+const latest = posts.slice(0, 5);
+---
+
+<BaseLayout>
+  <section class="hero">
+    <h1>Hey, I'm Ben 👋</h1>
+    <p class="lead">
+      Welcome to my blog. I write about code, the projects I'm building, and the
+      things I learn along the way.
+    </p>
+    <p>
+      <a class="button" href={href('/blog/')}>Read the blog →</a>
+      <a class="button button-ghost" href={href('/about/')}>About me</a>
+    </p>
+  </section>
+
+  <section class="home-posts">
+    <div class="section-head">
+      <h2>Latest posts</h2>
+      <a class="see-all" href={href('/blog/')}>View all →</a>
+    </div>
+    <div class="post-list">
+      {latest.map((post) => <PostCard post={post} />)}
+    </div>
+  </section>
+</BaseLayout>
