@@ -72,3 +72,12 @@ This is a GitHub Pages **project site**, so `astro.config.mjs` sets:
 Because of the `base`, internal links are built with the `href()` helper in
 `src/utils/path.ts` so they always point at the right place. If you later move
 to a custom domain, update `site`, drop `base`, and simplify those links.
+
+For GitHub Actions deploys to work, enable Pages once in the repository settings:
+
+1. Open `Settings` → `Pages`
+2. Under `Build and deployment`, set `Source` to `GitHub Actions`
+
+The workflow intentionally does not try to auto-enable Pages from CI, because
+that requires a Personal Access Token or GitHub App admin permissions that the
+default `GITHUB_TOKEN` does not have.

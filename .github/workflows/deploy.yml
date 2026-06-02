@@ -24,10 +24,8 @@ jobs:
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v6
-      - name: Enable GitHub Pages (first run only)
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v6
       - name: Install, build, and upload your site
         uses: withastro/action@v6
 
