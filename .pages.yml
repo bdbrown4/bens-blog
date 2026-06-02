@@ -1,0 +1,62 @@
+# Pages CMS configuration — https://pagescms.org
+# After you connect this repo at https://app.pagescms.org, you'll get a
+# friendly editor for the "Blog posts" collection below: create, edit,
+# and delete posts, with image uploads — all committed back to this repo,
+# which triggers an automatic redeploy.
+
+# Where uploaded images are stored, and the URL written into your content.
+# NOTE: the output path includes the site's base (/bens-blog) so images
+# resolve in production. If you ever move to a custom domain (base "/"),
+# change output to "/images".
+media:
+  input: public/images
+  output: /bens-blog/images
+  categories: [image]
+
+content:
+  - name: posts
+    label: Blog posts
+    type: collection
+    path: src/content/blog
+    format: yaml-frontmatter
+    # New posts are named from the title (slugified), e.g. "My First Post"
+    # -> my-first-post.md -> /blog/my-first-post/. You can tweak it on create.
+    filename:
+      template: "{fields.title}.md"
+      field: create
+    view:
+      fields: [title, pubDate, draft]
+      primary: title
+      sort: [pubDate, title]
+      search: [title, description]
+      default:
+        sort: pubDate
+        order: desc
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+      - name: description
+        label: Description
+        type: text
+        required: true
+      - name: pubDate
+        label: Publish date
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: tags
+        label: Tags
+        type: string
+        list: true
+      - name: draft
+        label: Draft (hide from the live site)
+        type: boolean
+        default: false
+      - name: body
+        label: Body
+        type: rich-text
+        options:
+          format: markdown
