@@ -1,26 +1,54 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { href } from '../utils/path';
 ---
 
-<BaseLayout title="About" description="A little about Ben and this blog.">
+<BaseLayout
+  title="About"
+  description="Software developer, AI tinkerer, and dad of twins — thinking out loud about building things and living with intention."
+>
   <article class="prose">
     <h1>About</h1>
     <p>
-      Hi, I'm Ben. This is my corner of the internet — a place to write down
-      what I'm working on, share things I've figured out, and keep notes I'll
-      probably want again later.
+      Hi, I'm Ben. I'm a software developer who spends a lot of his time thinking
+      about AI — not just as a tool, but as something that's genuinely reshaping
+      what it means to build things, to work, and to be useful. I care about that
+      deeply, and I try to keep one question close in everything I make: is this
+      actually making life better in a way that matters?
     </p>
     <p>
-      This site is built with <a href="https://astro.build" rel="noopener" target="_blank">Astro</a>,
-      a fast framework for content-focused websites, and it's hosted for free on
-      GitHub Pages. Every time I push a change, it redeploys automatically.
+      Away from the keyboard, I'm a dad to twin boys and a husband to my wife,
+      Katie. My family is the anchor and the reason behind most of what I do.
     </p>
-    <h2>What you'll find here</h2>
+    <p>
+      I also think a lot — maybe too much. I've been told I overthink things, and
+      I won't argue with that. But I'd rather be the kind of person who wrestles
+      with the hard questions than one who doesn't notice them. I'm drawn to
+      philosophy, to agency, and to what it means to live with intention — and I
+      believe people have far more power to shape their circumstances than they
+      usually give themselves credit for.
+    </p>
+
+    <h2>What I write about</h2>
+    <p>Whatever's on my mind, honestly. Usually some mix of:</p>
     <ul>
-      <li>Notes on projects I'm building</li>
-      <li>Things I learn about code and tools</li>
-      <li>The occasional longer write-up</li>
+      <li><strong>Building</strong> — things I'm making, and lessons learned the hard way</li>
+      <li><strong>AI</strong> — where it's going, and what excites and concerns me about it</li>
+      <li><strong>Ideas</strong> — philosophy and the kind of questions that don't have clean answers</li>
+      <li><strong>Family &amp; life</strong> — reflections on being a dad, a husband, and a person trying to do good work</li>
     </ul>
-    <p>Thanks for stopping by.</p>
+    <p>
+      Think of this as my public notebook — a place to scribble. No fixed cadence
+      and no content calendar; just whatever's worth writing down.
+    </p>
+
+    <h2>Follow along</h2>
+    <p>
+      New posts go out on the <a href={href('/rss.xml')}>RSS feed</a> — drop that link
+      into any reader and you'll catch them as they land. The site itself is built with
+      <a href="https://astro.build" rel="noopener" target="_blank">Astro</a> and hosted
+      free on GitHub Pages, so every change I make redeploys automatically.
+    </p>
+    <p>Thanks for being here.</p>
   </article>
 </BaseLayout>
