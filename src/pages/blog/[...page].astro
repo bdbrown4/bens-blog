@@ -1,0 +1,187 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { readingTime } from '../../utils/reading-time';
+import { href } from '../../utils/path';
+
+// Generate one page per 10 posts. With the rest param `[...page]`, page 1
+// lives at /blog/ and subsequent pages at /blog/2/, /blog/3/, ...
+// Note: getStaticPaths runs in an isolated scope, so the page size is inlined
+// here rather than referencing a module-level const.
+export async function getStaticPaths({ paginate }) {
+  const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+  );
+  return paginate(posts, { pageSize: 10 });
+}
+
+const { page } = Astro.props;
+
+// Full index of every post for client-side search. Search must run in the
+// browser because the site is statically generated — so we ship a small JSON
+// index covering ALL posts, not just the ones on the current page.
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+const searchIndex = allPosts.map((post) => ({
+  title: post.data.title,
+  description: post.data.description,
+  url: href(`/blog/${post.id}/`),
+  date: post.data.pubDate.toISOString(),
+  // Pre-format on the server so search results match the browse cards
+  // exactly, regardless of the visitor's timezone.
+  dateLabel: post.data.pubDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }),
+  readingTime: readingTime(post.body ?? ''),
+  tags: post.data.tags.map((t) => ({ name: t, url: href(`/tags/${t}/`) })),
+  // Lowercased blob the client matches queries against.
+  haystack: [post.data.title, post.data.description, ...post.data.tags]
+    .join(' ')
+    .toLowerCase(),
+}));
+
+// Embed the index as inert JSON. Escaping `<` prevents a `</script>` in any
+// title/description from breaking out of the script tag.
+const indexJson = JSON.stringify(searchIndex).replace(/</g, '\\u003c');
+
+const pageHref = (n: number) => href(n === 1 ? '/blog/' : `/blog/${n}/`);
+const pageNumbers = Array.from({ length: page.lastPage }, (_, i) => i + 1);
+---
+
+<BaseLayout title="Blog" description="Every post, newest first.">
+  <h1>Blog</h1>
+  <p class="page-intro">{page.total} {page.total === 1 ? 'post' : 'posts'} and counting.</p>
+
+  <!-- Search: revealed by JS so no-JS visitors aren't shown a dead box. -->
+  <div class="search" hidden data-search>
+    <label class="search-label" for="post-search">Search posts</label>
+    <input
+      id="post-search"
+      class="search-input"
+      type="search"
+      placeholder="Search by title, summary, or tag…"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <p class="search-status" data-search-status hidden></p>
+  </div>
+
+  <!-- Default paginated browsing (also the no-JS experience). -->
+  <div data-browse>
+    <div class="post-list">
+      {page.data.map((post) => <PostCard post={post} />)}
+    </div>
+
+    {
+      page.lastPage > 1 && (
+        <nav class="pager" aria-label="Pagination">
+          {page.url.prev ? (
+            <a class="pager-link" href={pageHref(page.currentPage - 1)} rel="prev">
+              ← Prev
+            </a>
+          ) : (
+            <span class="pager-link is-disabled" aria-hidden="true">
+              ← Prev
+            </span>
+          )}
+
+          <span class="pager-pages">
+            {pageNumbers.map((n) =>
+              n === page.currentPage ? (
+                <span class="pager-num is-current" aria-current="page">
+                  {n}
+                </span>
+              ) : (
+                <a class="pager-num" href={pageHref(n)}>
+                  {n}
+                </a>
+              )
+            )}
+          </span>
+
+          {page.url.next ? (
+            <a class="pager-link" href={pageHref(page.currentPage + 1)} rel="next">
+              Next →
+            </a>
+          ) : (
+            <span class="pager-link is-disabled" aria-hidden="true">
+              Next →
+            </span>
+          )}
+        </nav>
+      )
+    }
+  </div>
+
+  <!-- Client-rendered results; populated only while a query is active. -->
+  <div class="post-list" data-results hidden></div>
+
+  <script type="application/json" id="search-index" set:html={indexJson} />
+
+  <script>
+    const root = document.querySelector('[data-search]');
+    const input = document.getElementById('post-search') as HTMLInputElement | null;
+    const status = document.querySelector('[data-search-status]') as HTMLElement | null;
+    const browse = document.querySelector('[data-browse]') as HTMLElement | null;
+    const results = document.querySelector('[data-results]') as HTMLElement | null;
+    const indexEl = document.getElementById('search-index');
+
+    if (root && input && status && browse && results && indexEl) {
+      const posts = JSON.parse(indexEl.textContent || '[]');
+      root.removeAttribute('hidden');
+
+      const esc = (s: string) =>
+        s.replace(/[&<>"']/g, (c) =>
+          ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string)
+        );
+
+      const cardHtml = (p: any) => {
+        const tags = p.tags.length
+          ? `<p class="tags">${p.tags
+              .map(
+                (t: any) =>
+                  `<a class="tag" href="${esc(t.url)}">#${esc(t.name)}</a>`
+              )
+              .join('')}</p>`
+          : '';
+        return `<article class="post-card">
+            <h2 class="post-card-title"><a href="${esc(p.url)}">${esc(p.title)}</a></h2>
+            <p class="post-meta">
+              <time datetime="${esc(p.date)}">${esc(p.dateLabel)}</time>
+              <span class="dot">·</span>
+              <span>${esc(p.readingTime)}</span>
+            </p>
+            <p class="post-card-excerpt">${esc(p.description)}</p>
+            ${tags}
+          </article>`;
+      };
+
+      const render = () => {
+        const q = input.value.trim().toLowerCase();
+
+        if (!q) {
+          browse.hidden = false;
+          results.hidden = true;
+          results.innerHTML = '';
+          status.hidden = true;
+          return;
+        }
+
+        const matches = posts.filter((p: any) => p.haystack.includes(q));
+        browse.hidden = true;
+        results.hidden = false;
+        results.innerHTML = matches.map(cardHtml).join('');
+        status.hidden = false;
+        status.textContent = matches.length
+          ? `${matches.length} ${matches.length === 1 ? 'result' : 'results'} for “${input.value.trim()}”`
+          : `No posts match “${input.value.trim()}”.`;
+      };
+
+      input.addEventListener('input', render);
+    }
+  </script>
+</BaseLayout>
