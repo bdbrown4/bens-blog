@@ -13,6 +13,7 @@ const blog = defineCollection({
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
     heroImage: z.string().optional(),
+    colophon: z.string().nullable().default('Drafted by me, structured with Claude.'),
   }),
 });
 
