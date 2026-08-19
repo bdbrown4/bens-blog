@@ -10,7 +10,7 @@ interface Props {
 }
 
 const { post, readingTime } = Astro.props;
-const { title, description, pubDate, updatedDate, tags } = post.data;
+const { title, description, pubDate, updatedDate, tags, colophon } = post.data;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -45,8 +45,24 @@ const { title, description, pubDate, updatedDate, tags } = post.data;
       <slot />
     </div>
 
+    {colophon && (
+      <footer class="colophon">
+        <p>{colophon}</p>
+      </footer>
+    )}
+
     <p class="back-link">
       <a href={href('/blog/')}>← Back to all posts</a>
     </p>
   </article>
 </BaseLayout>
+
+<style>
+  .colophon {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.875rem;
+    opacity: 0.65;
+  }
+</style>
